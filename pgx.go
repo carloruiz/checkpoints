@@ -8,14 +8,6 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
-// CreateTableSQL is the DDL for the checkpoints table.
-// Compatible with PostgreSQL and CockroachDB.
-const CreateTableSQL = `CREATE TABLE IF NOT EXISTS checkpoints (
-	key        VARCHAR(256) PRIMARY KEY,
-	value      JSONB NOT NULL,
-	updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-)`
-
 // DBTX is the database interface satisfied by *pgxpool.Pool, *pgx.Conn, and pgx.Tx.
 type DBTX interface {
 	Exec(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error)
@@ -25,12 +17,6 @@ type DBTX interface {
 // NewPGXStore creates a Store backed by PostgreSQL or CockroachDB.
 func NewPGXStore(db DBTX) Store {
 	return newStore(&pgxBackend{db: db})
-}
-
-// CreateTable creates the checkpoints table if it does not exist.
-func CreateTable(ctx context.Context, db DBTX) error {
-	_, err := db.Exec(ctx, CreateTableSQL)
-	return err
 }
 
 type pgxBackend struct {

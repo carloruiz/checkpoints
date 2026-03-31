@@ -36,11 +36,6 @@ func main() {
 	}
 	defer pool.Close()
 
-	// Create the checkpoints table (idempotent).
-	if err := checkpoints.CreateTable(ctx, pool); err != nil {
-		log.Fatal(err)
-	}
-
 	store := checkpoints.NewPGXStore(pool)
 
 	// Save a checkpoint.
@@ -62,6 +57,14 @@ func main() {
 	fmt.Printf("step=%d status=%s\n", p.Step, p.Status)
 	// Output: step=3 status=done
 }
+```
+
+## Schema
+
+Apply `schema.sql` to your database before using the library:
+
+```bash
+psql -f schema.sql postgres://localhost:5432/mydb
 ```
 
 ## Testing

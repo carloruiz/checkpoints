@@ -5,8 +5,13 @@ import (
 	"os"
 	"testing"
 
+	_ "embed"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 )
+
+//go:embed schema.sql
+var schemaSQL string
 
 // Integration tests run against every configured database engine.
 // Set one or both environment variables to enable:
@@ -40,8 +45,8 @@ func forEachDB(t *testing.T, fn func(t *testing.T, s Store)) {
 			}
 			t.Cleanup(pool.Close)
 
-			if err := CreateTable(ctx, pool); err != nil {
-				t.Fatalf("CreateTable: %v", err)
+			if _, err := pool.Exec(ctx, schemaSQL); err != nil {
+				t.Fatalf("create table: %v", err)
 			}
 			t.Cleanup(func() {
 				pool.Exec(context.Background(), "DELETE FROM checkpoints")
